@@ -20,7 +20,7 @@
             <div v-if="lancha.estado === 1">
                 <div class="d-flex justify-content-between">
                     <small class="text-uppercase mt-2">Tiempo Restante:</small>
-                    <h4>00:15:00</h4>
+                    <h4>{{restarTiempo(momento)}}</h4>
                 </div>
                 <hr />
                 <b-button :to="{name: 'Rentas'}" variant="warning" class="m-2">Ir a rentas</b-button>
@@ -95,6 +95,7 @@
 
 <script>
     import { mapActions, mapState } from 'vuex';
+    import moment from 'moment'
     export default {
         name: "Lancha",
         data() {
@@ -104,14 +105,17 @@
                 cant_jov: null,
                 error: null,
                 showError: false,
-                precioSeleccionado: null
+                precioSeleccionado: null,
+                tiempo: '00:00:00'
             }
         },
         computed: {
             ...mapState(['precios'])
         },
         props: {
-            lancha: Object
+            lancha: Object,
+            usos: Array,
+            momento: ''
         },
         methods: {
             ...mapActions(['actualizarLancha', 'nuevaRenta', 'nuevoUso']),
@@ -147,7 +151,42 @@
             reiniciarModal() {
                 this.cant_adult = null;
                 this.cant_jov = null;
+            },
+            sumarTiempo() {
+                let tTiempo = moment("00:00:00", 'HH:mm:ss')
+                for(let i in this.usos){
+                    if(this.usos[i].renta.lancha_id === this.lancha.id) {
+                        tTiempo = moment(tTiempo, 'HH:mm:ss')
+                            .add(this.usos[i].tiempo.split(":")[2], 'seconds')
+                            .add(this.usos[i].tiempo.split(":")[1], 'minutes')
+                            .add(this.usos[i].tiempo.split(":")[0], 'hours')
+                    }
+                }
+                this.tiempo = tTiempo.format("HH:mm:ss")
+                //let test = moment(this.tiempo, 'HH:mm:ss').subtract(1, "seconds").toDate()
+                //console.log(moment(test, 'HH:mm:ss'))
+            },
+            restarTiempo(m) {
+                let hi = new Date(this.getRenta_de()).toLocaleTimeString() //Hora inicio para restar
+                /*console.log(this.renta.fecha+" "+m)
+                console.log(this.renta.fecha+" "+hi)*/
+                let dif1 = moment.utc(moment(m,"HH:mm:ss").diff(moment(hi,"HH:mm:ss"))).format("HH:mm:ss") //Diferencia entre Hora sistema y Hora inicio
+                let dif2 = moment.utc(moment(this.tiempo,"HH:mm:ss").diff(moment(dif1,"HH:mm:ss"))).format("HH:mm:ss") //Diferencia entre tiempo y dif1
+                if(dif2.split(":")[0]==="23" || dif2.split(":")[0]==="22" || dif2.split(":")[0]==="21") {
+                    dif2 = "00:00:00"
+                }
+                return dif2
+            },
+            getRenta_de() {
+                for(let i in this.usos){
+                    if(this.usos[i].renta.lancha_id === this.lancha.id) {
+                        return this.usos[i].renta.renta_de
+                    }
+                }
             }
+        },
+        mounted() {
+            this.sumarTiempo()
         }
     }
 </script>

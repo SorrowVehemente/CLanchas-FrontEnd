@@ -12,9 +12,13 @@
             </div>
             <hr />
             <div class="d-flex justify-content-between">
-                <small class="text-uppercase mt-2">Tiempo Restante:</small>
+                <small class="text-uppercase mt-2">Tiempo Comprado:</small>
                 <small class="text-uppercase mt-2">{{tiempo}}</small>
-                <small class="text-uppercase mt-2">{{momento}}</small>
+            </div>
+            <hr />
+            <div class="d-flex justify-content-between">
+                <small class="text-uppercase mt-2">Tiempo Restante:</small>
+                <small class="text-uppercase mt-2">{{restarTiempo(momento)}}</small>
             </div>
             <hr />
             <div class="d-flex justify-content-between">
@@ -110,6 +114,7 @@
                 this.nuevoUso({renta_id: renta.id, tiempo: precio.tiempo, precio: precio.precio});
                 this.toggleModal();
                 this.reiniciarModal();
+                this.sumarTiempoGeneral(precio.tiempo)
             },
             toggleModal() {
                 this.agregarTiempoModal = !this.agregarTiempoModal;
@@ -117,8 +122,15 @@
             reiniciarModal() {
                 this.precioSeleccionado = null;
             },
-            sumarTiempo(){
-                let tTiempo = '00:00:00'
+            sumarTiempoGeneral(tiempo) {
+                let tTiempo = moment(this.tiempo, 'HH:mm:ss')
+                        .add(tiempo.split(":")[2], 'seconds')
+                        .add(tiempo.split(":")[1], 'minutes')
+                        .add(tiempo.split(":")[0], 'hours')
+                this.tiempo = tTiempo.format("HH:mm:ss")
+            },
+            sumarTiempo() {
+                let tTiempo = moment("00:00:00", 'HH:mm:ss')
                 for(let i in this.usos){
                     if(this.usos[i].renta_id === this.renta.id) {
                         tTiempo = moment(tTiempo, 'HH:mm:ss')
@@ -130,6 +142,17 @@
                 this.tiempo = tTiempo.format("HH:mm:ss")
                 //let test = moment(this.tiempo, 'HH:mm:ss').subtract(1, "seconds").toDate()
                 //console.log(moment(test, 'HH:mm:ss'))
+            },
+            restarTiempo(m) {
+                let hi = new Date(this.renta.renta_de).toLocaleTimeString() //Hora inicio para restar
+                /*console.log(this.renta.fecha+" "+m)
+                console.log(this.renta.fecha+" "+hi)*/
+                let dif1 = moment.utc(moment(m,"HH:mm:ss").diff(moment(hi,"HH:mm:ss"))).format("HH:mm:ss") //Diferencia entre Hora sistema y Hora inicio
+                let dif2 = moment.utc(moment(this.tiempo,"HH:mm:ss").diff(moment(dif1,"HH:mm:ss"))).format("HH:mm:ss") //Diferencia entre tiempo y dif1
+                if(dif2.split(":")[0]==="23" || dif2.split(":")[0]==="22" || dif2.split(":")[0]==="21") {
+                    dif2 = "00:00:00"
+                }
+                return dif2
             }
         },
         mounted() {

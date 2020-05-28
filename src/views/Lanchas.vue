@@ -7,7 +7,9 @@
         <b-row>
             <Lancha v-for="(lancha, indx) in lanchas"
                     :lancha="lancha"
-                    :key="indx" />
+                    :key="indx"
+                    :usos="usosActivos"
+                    :momento="momento" />
         </b-row>
         <div class="mt-5 text-center" v-if="!lanchas.length">
             <h4>No hay lanchas para mostrar.</h4>
@@ -41,12 +43,19 @@
                 </div>
             </form>
         </b-modal>
+        <div>
+            {{usosActivos}}
+        </div>
+        <div>
+            {{momento}}
+        </div>
     </div>
 </template>
 
 <script>
     import Lancha from '@/components/Lancha.vue';
     import { mapState, mapActions } from 'vuex';
+    import moment from 'moment'
 
     export default {
         name: "Lanchas",
@@ -56,7 +65,9 @@
                 numero: null,
                 nombre: '',
                 error: null,
-                showError: false
+                showError: false,
+                momento: '',
+                timer: ''
             }
         },
         methods: {
@@ -78,16 +89,26 @@
             resetNuevaLancha() {
                 this.numero = null;
                 this.nombre = '';
+            },
+            //Tiempo
+            startTimer: function() {
+                this.timer = setInterval(() => this.countdown(), 1000);
+            },
+            countdown: function() {
+                this.momento = moment(new Date()).local().format('HH:mm:ss')
             }
         },
         computed: {
-            ...mapState(['lanchas', 'precios'])
+            ...mapState(['lanchas', 'precios', 'usosActivos'])
         },
         created() {
             this.getLanchas();
             if (!this.precios.length) {
                 this.obtenerPrecios();
             }
+        },
+        mounted(){
+            this.startTimer()
         },
         components: {
             Lancha

@@ -26,15 +26,6 @@
         name: "Rentas",
         computed: {
             ...mapState(['rentas', 'precios', 'usosActivos']),
-            //Tiempo
-            minutes: function() {
-                const minutes = Math.floor(this.totalTime / 60);
-                return this.padTime(minutes);
-            },
-            seconds: function() {
-                const seconds = this.totalTime - (this.minutes * 60);
-                return this.padTime(seconds);
-            }
         },
         data () {
             return {
