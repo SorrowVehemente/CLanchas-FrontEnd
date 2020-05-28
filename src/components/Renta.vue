@@ -13,8 +13,8 @@
             <hr />
             <div class="d-flex justify-content-between">
                 <small class="text-uppercase mt-2">Tiempo Restante:</small>
-                <h4>00:15:00</h4>
-<!--                <h4>{{tiempoRestante}}</h4>-->
+                <small class="text-uppercase mt-2">{{tiempo}}</small>
+                <small class="text-uppercase mt-2">{{momento}}</small>
             </div>
             <hr />
             <div class="d-flex justify-content-between">
@@ -64,6 +64,7 @@
 
 <script>
     import { mapState, mapActions } from 'vuex';
+    import moment from 'moment'
     export default {
         name: "Renta",
         data() {
@@ -71,11 +72,14 @@
                 error: null,
                 showError: false,
                 agregarTiempoModal: false,
-                precioSeleccionado: null
+                precioSeleccionado: null,
+                tiempo: '00:00:00'
             }
         },
         props: {
             renta: Object,
+            usos: Array,
+            momento: ''
         },
         computed: {
             ...mapState(['precios'])
@@ -112,7 +116,24 @@
             },
             reiniciarModal() {
                 this.precioSeleccionado = null;
+            },
+            sumarTiempo(){
+                let tTiempo = '00:00:00'
+                for(let i in this.usos){
+                    if(this.usos[i].renta_id === this.renta.id) {
+                        tTiempo = moment(tTiempo, 'HH:mm:ss')
+                            .add(this.usos[i].tiempo.split(":")[2], 'seconds')
+                            .add(this.usos[i].tiempo.split(":")[1], 'minutes')
+                            .add(this.usos[i].tiempo.split(":")[0], 'hours')
+                    }
+                }
+                this.tiempo = tTiempo.format("HH:mm:ss")
+                //let test = moment(this.tiempo, 'HH:mm:ss').subtract(1, "seconds").toDate()
+                //console.log(moment(test, 'HH:mm:ss'))
             }
+        },
+        mounted() {
+            this.sumarTiempo()
         }
     }
 </script>

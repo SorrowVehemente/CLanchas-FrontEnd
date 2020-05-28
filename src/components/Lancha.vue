@@ -132,14 +132,14 @@
                 this.reiniciarModal();
             },
             desocuparLancha(lancha) {
-                console.log(`Desocupar ${lancha.id}`);
+                //console.log(`Desocupar ${lancha.id}`);
                 this.actualizarLancha({lancha, estado: 0});
             },
             cambiarEstado(lancha, estado) {
                 this.actualizarLancha({lancha, estado});
             },
             agregarTiempo(lancha) {
-                console.log(`Agregar tiempo lancha: ${lancha.id}`);
+                //console.log(`Agregar tiempo lancha: ${lancha.id}`);
             },
             toggleModal() {
                 this.mostrarModal = !this.mostrarModal;

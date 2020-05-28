@@ -5,26 +5,51 @@
             <router-link :to="{name: 'Lanchas'}" title="Nueva renta" class="m-2">Agregar renta</router-link>
         </div>
         <b-row>
-            <Renta v-for="(renta, indx) in rentas" :key="indx" :renta="renta" />
+            <Renta v-for="(renta, indx) in rentas" :key="indx" :renta="renta" :usos="usosActivos" :momento="momento" />
         </b-row>
         <p v-for="(uso, indx) in usosActivos" :key="indx">{{uso}}</p>
         <div class="mt-5 text-center" v-if="!rentas.length">
             <h4>No hay rentas activas.</h4>
             <router-link :to="{ name: 'Lanchas' }" title="Nueva renta">Agregar renta</router-link>
         </div>
+        <div>
+            <h1>{{momento}}</h1>
+        </div>
     </div>
 </template>
 
 <script>
     import { mapActions, mapState } from 'vuex';
+    import moment from 'moment'
     import Renta from '@/components/Renta';
     export default {
         name: "Rentas",
         computed: {
-            ...mapState(['rentas', 'precios', 'usosActivos'])
+            ...mapState(['rentas', 'precios', 'usosActivos']),
+            //Tiempo
+            minutes: function() {
+                const minutes = Math.floor(this.totalTime / 60);
+                return this.padTime(minutes);
+            },
+            seconds: function() {
+                const seconds = this.totalTime - (this.minutes * 60);
+                return this.padTime(seconds);
+            }
         },
+        data () {
+            return {
+                momento: ''
+            }
+	    },
         methods: {
-            ...mapActions(['obtenerRentas', 'obtenerPrecios', 'obtenerUsosDeRentasActivas'])
+            ...mapActions(['obtenerRentas', 'obtenerPrecios', 'obtenerUsosDeRentasActivas']),
+            //Tiempo
+            startTimer: function() {
+                this.timer = setInterval(() => this.countdown(), 1000);
+            },
+            countdown: function() {
+                this.momento = moment(new Date()).local().format('HH:mm:ss')
+            }
         },
         created() {
             this.obtenerRentas();
@@ -32,6 +57,9 @@
                 this.obtenerPrecios();
             }
             this.obtenerUsosDeRentasActivas();
+        },
+        mounted(){
+            this.startTimer()
         },
         components: {
             Renta
