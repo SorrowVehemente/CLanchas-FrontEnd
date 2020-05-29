@@ -11,14 +11,17 @@
                     :usos="usosActivos"
                     :momento="momento" />
         </b-row>
-        <div class="mt-5 text-center" v-if="!lanchas.length">
+        <div class="mt-5 text-center" v-if="!lanchas.length && !error">
             <h4>No hay lanchas para mostrar.</h4>
             <b-button @click="toggleModal()" variant="link">Agregar lancha</b-button>
+        </div>
+        <div class="mt-5 text-danger text-center" v-if="error">
+            <h4>Error de conexión al servidor, compruebe las conexiones.</h4>
         </div>
 <!--        TODO: separar este modal a un componente-->
         <b-modal hide-footer v-model="agregarLanchaModal" title="Nueva lancha" centered>
             <b-alert v-model="showError" variant="danger" dismissible>
-                {{error}}
+                {{errorModal}}
             </b-alert>
             <form @submit.prevent="sumitLancha()">
                 <b-row class="mb-2">
@@ -43,12 +46,6 @@
                 </div>
             </form>
         </b-modal>
-        <div>
-            {{usosActivos}}
-        </div>
-        <div>
-            {{momento}}
-        </div>
     </div>
 </template>
 
@@ -64,17 +61,17 @@
                 agregarLanchaModal: false,
                 numero: null,
                 nombre: '',
-                error: null,
+                errorModal: null,
                 showError: false,
                 momento: '',
                 timer: ''
             }
         },
         methods: {
-            ...mapActions(['getLanchas', 'nuevaLancha', 'obtenerPrecios']),
+            ...mapActions(['getLanchas', 'nuevaLancha', 'obtenerPrecios', 'obtenerUsosDeRentasActivas']),
             sumitLancha() {
                 if(!this.numero) {
-                    this.error = 'No ha ingresado un número';
+                    this.errorModal = 'No ha ingresado un número';
                     this.showError = true;
                     return;
                 }
@@ -91,20 +88,23 @@
                 this.nombre = '';
             },
             //Tiempo
-            startTimer: function() {
+            startTimer() {
                 this.timer = setInterval(() => this.countdown(), 1000);
             },
-            countdown: function() {
+            countdown() {
                 this.momento = moment(new Date()).local().format('HH:mm:ss')
             }
         },
         computed: {
-            ...mapState(['lanchas', 'precios', 'usosActivos'])
+            ...mapState(['lanchas', 'precios', 'usosActivos', 'error'])
         },
         created() {
             this.getLanchas();
             if (!this.precios.length) {
                 this.obtenerPrecios();
+            }
+            if(!this.usosActivos.length) {
+                this.obtenerUsosDeRentasActivas();
             }
         },
         mounted(){

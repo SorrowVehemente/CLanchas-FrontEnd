@@ -18,7 +18,7 @@
             <hr />
             <div class="d-flex justify-content-between">
                 <small class="text-uppercase mt-2">Tiempo Restante:</small>
-                <h4 :class="[(restarTiempo(momento) === '00:00:00') ? 'text-danger' : (tresMinutos(restarTiempo(momento))) ?  'text-warning' :'text-success', 'text-uppercase', 'mt-2']">{{restarTiempo(momento)}}</h4>
+                <h4 :class="[(restarTiempo(momento) === '00:00:00') ? 'text-danger' : (tresMinutos(restarTiempo(momento))) ?  'text-warning' :'text-success', 'mt-2']">{{restarTiempo(momento)}}</h4>
             </div>
             <p class=""></p>
             <hr />
@@ -94,7 +94,7 @@
             removeRenta(renta) {
                 this.$swal.fire({
                     title: '¿De verdad desea terminar la Renta?',
-                    text: "¡Esta acción no se puede deshacer!",
+                    html: `¡Esta acción no se puede deshacer!<br /><hr />`+this.obtenerTiempoPrecioFinal(),
                     icon: 'warning',
                     showCancelButton: true,
                     cancelButtonColor: '#dd3333',
@@ -141,39 +141,44 @@
                     }
                 }
                 this.tiempo = tTiempo.format("HH:mm:ss")
-                //let test = moment(this.tiempo, 'HH:mm:ss').subtract(1, "seconds").toDate()
-                //console.log(moment(test, 'HH:mm:ss'))
             },
             restarTiempo(m) {
                 let hi = new Date(this.renta.renta_de).toLocaleTimeString() //Hora inicio para restar
-                /*console.log(this.renta.fecha+" "+m)
-                console.log(this.renta.fecha+" "+hi)*/
                 let dif1 = moment.utc(moment(m,"HH:mm:ss").diff(moment(hi,"HH:mm:ss"))).format("HH:mm:ss") //Diferencia entre Hora sistema y Hora inicio
                 let dif2 = moment.utc(moment(this.tiempo,"HH:mm:ss").diff(moment(dif1,"HH:mm:ss"))).format("HH:mm:ss") //Diferencia entre tiempo y dif1
-                if(dif2.split(":")[0]==="23" || dif2.split(":")[0]==="22" || dif2.split(":")[0]==="21") {
-                    dif2 = "00:00:00"
+                // Diff dias
+                if (new Date(this.renta.renta_de).getDate() < new Date().getDate()) {
+                    dif2 = '00:00:00';
                 }
-                // this.tresMinutos(dif2);
-                return dif2
+                if(dif2.split(':')[0] === '23' || dif2.split(':')[0] === '22' || dif2.split(':')[0] === '21') {
+                    dif2 = '00:00:00';
+                }
+                if(dif2 === 'Invalid date') {
+                    dif2 = 'Cargando...';
+                }
+                return dif2;
             },
             tresMinutos(dif) {
-                // let tTiempo = moment("00:00:00", 'HH:mm:ss')
-                // for(let uso in this.usos){
-                //     if(this.usos[uso].renta_id === this.renta.id) {
-                //         tTiempo = moment(tTiempo, 'HH:mm:ss')
-                //             .add(this.usos[uso].tiempo.split(":")[2], 'seconds')
-                //             .add(this.usos[uso].tiempo.split(":")[1], 'minutes')
-                //             .add(this.usos[uso].tiempo.split(":")[0], 'hours')
-                //     }
-                // }
-                let tTiempo = moment("00:00:00", 'HH:mm:ss')
+                let tTiempo = moment('00:00:00', 'HH:mm:ss')
                     .add(dif.split(':')[2], 'seconds')
                     .add(dif.split(':')[1], 'minutes')
                     .add(dif.split(":")[0], 'hours')
                 return tTiempo.minutes() < 3;
+            },
+            obtenerTiempoPrecioFinal() {
+                let resumen = '<h4>Timpo - Precio</h4>';
+                let precioFinal = 0.0;
+                this.usos.forEach(uso => {
+                    if(uso.renta_id === this.renta.id) {
+                        resumen += `${uso.tiempo} - $${uso.precio}<br />`;
+                        precioFinal += uso.precio;
+                    }
+                });
+                resumen += `<br /><h4>Precio final: $${precioFinal}</h4>`;
+                return resumen;
             }
         },
-        mounted() {
+        beforeUpdate() {
             this.sumarTiempo()
         }
     }

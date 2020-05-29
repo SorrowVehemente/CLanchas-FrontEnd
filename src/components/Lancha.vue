@@ -130,17 +130,11 @@
                     this.showError = true;
                     return;
                 }
-                console.log(precioSelect)
                 this.nuevaRenta({lancha, adl, jov, precio: precioSelect});
                 this.actualizarLancha({lancha, estado: 1});
                 this.toggleModal();
                 this.reiniciarModal();
                 this.sumarTiempoGeneral(precioSelect.tiempo)
-            },
-            desocuparLancha(lancha) {
-                //console.log(`Desocupar ${lancha.id}`);
-                this.actualizarLancha({lancha, estado: 0});
-                this.sumarTiempo();
             },
             cambiarEstado(lancha, estado) {
                 this.actualizarLancha({lancha, estado});
@@ -156,44 +150,47 @@
                 let tTiempo = moment(this.tiempo, 'HH:mm:ss')
                         .add(tiempo.split(":")[2], 'seconds')
                         .add(tiempo.split(":")[1], 'minutes')
-                        .add(tiempo.split(":")[0], 'hours')
-                this.tiempo = tTiempo.format("HH:mm:ss")
+                        .add(tiempo.split(":")[0], 'hours');
+                this.tiempo = tTiempo.format("HH:mm:ss");
             },
             sumarTiempo() {
-                let tTiempo = moment("00:00:00", 'HH:mm:ss')
+                let tTiempo = moment("00:00:00", 'HH:mm:ss');
                 for(let i in this.usos){
                     if(this.usos[i].renta.lancha_id === this.lancha.id) {
                         tTiempo = moment(tTiempo, 'HH:mm:ss')
                             .add(this.usos[i].tiempo.split(":")[2], 'seconds')
                             .add(this.usos[i].tiempo.split(":")[1], 'minutes')
-                            .add(this.usos[i].tiempo.split(":")[0], 'hours')
+                            .add(this.usos[i].tiempo.split(":")[0], 'hours');
                     }
                 }
-                this.tiempo = tTiempo.format("HH:mm:ss")
-                //let test = moment(this.tiempo, 'HH:mm:ss').subtract(1, "seconds").toDate()
-                //console.log(moment(test, 'HH:mm:ss'))
+                this.tiempo = tTiempo.format("HH:mm:ss");
             },
             restarTiempo(m) {
                 let hi = new Date(this.getRenta_de()).toLocaleTimeString() //Hora inicio para restar
-                /*console.log(this.renta.fecha+" "+m)
-                console.log(this.renta.fecha+" "+hi)*/
                 let dif1 = moment.utc(moment(m,"HH:mm:ss").diff(moment(hi,"HH:mm:ss"))).format("HH:mm:ss") //Diferencia entre Hora sistema y Hora inicio
                 let dif2 = moment.utc(moment(this.tiempo,"HH:mm:ss").diff(moment(dif1,"HH:mm:ss"))).format("HH:mm:ss") //Diferencia entre tiempo y dif1
-                if(dif2.split(":")[0]==="23" || dif2.split(":")[0]==="22" || dif2.split(":")[0]==="21") {
-                    dif2 = "00:00:00"
+                // Diff dias
+                if (new Date(this.getRenta_de()).getDate() < new Date().getDate()) {
+                    dif2 = '00:00:00';
                 }
-                return dif2
+                if(dif2.split(':')[0] === '23' || dif2.split(':')[0] === '22' || dif2.split(':')[0] === '21') {
+                    dif2 = '00:00:00';
+                }
+                if(dif2 === 'Invalid date') {
+                    dif2 = 'Cargando...';
+                }
+                return dif2;
             },
             getRenta_de() {
                 for(let i in this.usos){
                     if(this.usos[i].renta.lancha_id === this.lancha.id) {
-                        return this.usos[i].renta.renta_de
+                        return this.usos[i].renta.renta_de;
                     }
                 }
             }
         },
         beforeUpdate() {
-            this.sumarTiempo()
+            this.sumarTiempo();
         }
     }
 </script>

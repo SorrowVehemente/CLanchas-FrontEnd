@@ -10,10 +10,9 @@
         <b-row>
             <Renta v-for="(renta, indx) in rentas" :key="indx" :renta="renta" :usos="usosActivos" :momento="momento" />
         </b-row>
-        <p v-for="(uso, indx) in usosActivos" :key="indx">{{uso}}</p>
         <div class="mt-5 text-center" v-if="!rentas.length">
             <h4>No hay rentas activas.</h4>
-            <router-link :to="{ name: 'Lanchas' }" title="Nueva renta">Agregar renta</router-link>
+            <router-link :to="{ name: 'Lanchas' }" title="Nueva renta" class="m-2">Agregar renta</router-link>
         </div>
     </div>
 </template>
@@ -29,17 +28,17 @@
         },
         data () {
             return {
-                momento: ''
+                momento: 'Cargando...'
             }
 	    },
         methods: {
             ...mapActions(['obtenerRentas', 'obtenerPrecios', 'obtenerUsosDeRentasActivas']),
             //Tiempo
-            startTimer: function() {
+            startTimer() {
                 this.timer = setInterval(() => this.countdown(), 1000);
             },
-            countdown: function() {
-                this.momento = moment(new Date()).local().format('HH:mm:ss')
+            countdown() {
+                this.momento = moment(new Date()).local().format('HH:mm:ss');
             }
         },
         created() {
@@ -50,7 +49,7 @@
             this.obtenerUsosDeRentasActivas();
         },
         mounted(){
-            this.startTimer()
+            this.startTimer();
         },
         components: {
             Renta
