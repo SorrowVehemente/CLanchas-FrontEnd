@@ -203,6 +203,7 @@ export default new Vuex.Store({
             .then(res => {
                 dispatch('actualizarLancha', {lancha: res.data.lancha, estado: 0});
                 commit('quitarRenta', res.data);
+                dispatch('obtenerUsosDeRentasActivas');
                 console.log('Renta terminada.')
             })
             .catch(error => {

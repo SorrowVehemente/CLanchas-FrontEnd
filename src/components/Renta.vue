@@ -13,13 +13,14 @@
             <hr />
             <div class="d-flex justify-content-between">
                 <small class="text-uppercase mt-2">Tiempo Comprado:</small>
-                <small class="text-uppercase mt-2">{{tiempo}}</small>
+                <h4 class="text-uppercase mt-2">{{tiempo}}</h4>
             </div>
             <hr />
             <div class="d-flex justify-content-between">
                 <small class="text-uppercase mt-2">Tiempo Restante:</small>
-                <small class="text-uppercase mt-2">{{restarTiempo(momento)}}</small>
+                <h4 :class="[(restarTiempo(momento) === '00:00:00') ? 'text-danger' : (tresMinutos(restarTiempo(momento))) ?  'text-warning' :'text-success', 'text-uppercase', 'mt-2']">{{restarTiempo(momento)}}</h4>
             </div>
+            <p class=""></p>
             <hr />
             <div class="d-flex justify-content-between">
                 <small class="text-uppercase mt-2">Adultos:</small><h4>{{renta.c_adultos}}</h4>
@@ -152,7 +153,24 @@
                 if(dif2.split(":")[0]==="23" || dif2.split(":")[0]==="22" || dif2.split(":")[0]==="21") {
                     dif2 = "00:00:00"
                 }
+                // this.tresMinutos(dif2);
                 return dif2
+            },
+            tresMinutos(dif) {
+                // let tTiempo = moment("00:00:00", 'HH:mm:ss')
+                // for(let uso in this.usos){
+                //     if(this.usos[uso].renta_id === this.renta.id) {
+                //         tTiempo = moment(tTiempo, 'HH:mm:ss')
+                //             .add(this.usos[uso].tiempo.split(":")[2], 'seconds')
+                //             .add(this.usos[uso].tiempo.split(":")[1], 'minutes')
+                //             .add(this.usos[uso].tiempo.split(":")[0], 'hours')
+                //     }
+                // }
+                let tTiempo = moment("00:00:00", 'HH:mm:ss')
+                    .add(dif.split(':')[2], 'seconds')
+                    .add(dif.split(':')[1], 'minutes')
+                    .add(dif.split(":")[0], 'hours')
+                return tTiempo.minutes() < 3;
             }
         },
         mounted() {

@@ -140,12 +140,10 @@
             desocuparLancha(lancha) {
                 //console.log(`Desocupar ${lancha.id}`);
                 this.actualizarLancha({lancha, estado: 0});
+                this.sumarTiempo();
             },
             cambiarEstado(lancha, estado) {
                 this.actualizarLancha({lancha, estado});
-            },
-            agregarTiempo(lancha) {
-                //console.log(`Agregar tiempo lancha: ${lancha.id}`);
             },
             toggleModal() {
                 this.mostrarModal = !this.mostrarModal;
@@ -194,7 +192,7 @@
                 }
             }
         },
-        mounted() {
+        beforeUpdate() {
             this.sumarTiempo()
         }
     }
