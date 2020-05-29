@@ -130,10 +130,12 @@
                     this.showError = true;
                     return;
                 }
+                console.log(precioSelect)
                 this.nuevaRenta({lancha, adl, jov, precio: precioSelect});
                 this.actualizarLancha({lancha, estado: 1});
                 this.toggleModal();
                 this.reiniciarModal();
+                this.sumarTiempoGeneral(precioSelect.tiempo)
             },
             desocuparLancha(lancha) {
                 //console.log(`Desocupar ${lancha.id}`);
@@ -151,6 +153,13 @@
             reiniciarModal() {
                 this.cant_adult = null;
                 this.cant_jov = null;
+            },
+            sumarTiempoGeneral(tiempo) {
+                let tTiempo = moment(this.tiempo, 'HH:mm:ss')
+                        .add(tiempo.split(":")[2], 'seconds')
+                        .add(tiempo.split(":")[1], 'minutes')
+                        .add(tiempo.split(":")[0], 'hours')
+                this.tiempo = tTiempo.format("HH:mm:ss")
             },
             sumarTiempo() {
                 let tTiempo = moment("00:00:00", 'HH:mm:ss')
