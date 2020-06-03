@@ -164,6 +164,16 @@
                 this.sumarTiempoGeneral(precio.tiempo)
             },
             editarRenta(renta, c_adultos, c_jovenes, observaciones) {
+                if(!c_adultos) {
+                    this.showErrorEditar = true;
+                    this.errorEditar = 'Debe agregar la cantidad de adultos';
+                    return;
+                }
+                if(!c_jovenes) {
+                    this.showErrorEditar = true;
+                    this.errorEditar = 'Debe agregar la cantidad de jovenes';
+                    return;
+                }
                 this.$swal.fire({
                     title: '¿De verdad desea editar la Renta?',
                     icon: 'warning',

@@ -5,8 +5,9 @@
             <div class="d-flex justify-content-center">
                 <b-card-title>Lancha #{{lancha.numero}}</b-card-title>
             </div>
-            <b-card-text class="d-flex justify-content-start">
-                <small><b>Nombre: </b>{{lancha.nombre}}</small>
+            <b-card-text class="text-left">
+                <small><b>Nombre:</b></small><br />
+                <h6>{{lancha.nombre}}</h6>
             </b-card-text>
             <b-card-text class="d-flex justify-content-between">
                 <h5>Estado:</h5>
@@ -28,19 +29,25 @@
             <hr v-if="lancha.estado !== 1" />
             <b-dropdown v-if="lancha.estado !== 1" text="Acción" right :variant="lancha.estado === 0 ? 'success' : lancha.estado === 1  ? 'warning' : 'info'">
                 <div v-if="lancha.estado === 0">
-                    <b-dropdown-item @click="toggleModal()">Ocupar Lancha</b-dropdown-item>
+                    <b-dropdown-item @click="toggleModalOcupar()">Ocupar Lancha</b-dropdown-item>
+                    <b-dropdown-divider />
+                    <b-dropdown-item @click="toggleModalEditar()">Editar Lancha</b-dropdown-item>
                     <b-dropdown-divider />
                     <b-dropdown-item @click="cambiarEstado(lancha, 2)">Poner en reparación</b-dropdown-item>
                     <b-dropdown-item @click="cambiarEstado(lancha, 3)">Poner otro estado</b-dropdown-item>
                 </div>
                 <div v-else-if="lancha.estado === 2">
-                    <b-dropdown-item @click="toggleModal()">Ocupar Lancha</b-dropdown-item>
+                    <b-dropdown-item @click="toggleModalOcupar()">Ocupar Lancha</b-dropdown-item>
+                    <b-dropdown-divider />
+                    <b-dropdown-item @click="toggleModalEditar()">Editar Lancha</b-dropdown-item>
                     <b-dropdown-divider />
                     <b-dropdown-item @click="cambiarEstado(lancha, 3)">Poner otro estado</b-dropdown-item>
                     <b-dropdown-item @click="cambiarEstado(lancha, 0)">Cambiar lancha a Activa</b-dropdown-item>
                 </div>
                 <div v-else>
-                    <b-dropdown-item @click="toggleModal()">Ocupar Lancha</b-dropdown-item>
+                    <b-dropdown-item @click="toggleModalOcupar()">Ocupar Lancha</b-dropdown-item>
+                    <b-dropdown-divider />
+                    <b-dropdown-item @click="toggleModalEditar()">Editar Lancha</b-dropdown-item>
                     <b-dropdown-divider />
                     <b-dropdown-item @click="cambiarEstado(lancha, 2)">Poner en Reparación</b-dropdown-item>
                     <b-dropdown-item @click="cambiarEstado(lancha, 0)">Cambiar lancha a Activa</b-dropdown-item>
@@ -48,9 +55,9 @@
             </b-dropdown>
         </b-card>
 <!--        TODO: Separar este modal a un componente-->
-        <b-modal centered hide-footer v-model="mostrarModal" title="Ocupar lancha">
-            <b-alert v-model="showError" variant="danger" dismissible>
-                {{error}}
+        <b-modal centered hide-footer v-model="mostrarModalOcupar" title="Ocupar lancha">
+            <b-alert v-model="showErrorOcupar" variant="danger" dismissible>
+                {{errorOcupar}}
             </b-alert>
             <form @submit.prevent="submitRenta(lancha, cant_adult, cant_jov, precioSeleccionado)">
                 <b-row>
@@ -86,7 +93,34 @@
                 </b-row>
                 <div class="d-flex justify-content-end mt-2">
                     <b-button class="m-2" variant="success" type="submit">Enviar</b-button>
-                    <b-button @click="toggleModal()" class="m-2">Cancelar</b-button>
+                    <b-button @click="toggleModalOcupar()" class="m-2">Cancelar</b-button>
+                </div>
+            </form>
+        </b-modal>
+        <b-modal centered hide-footer v-model="mostrarModalEditar" title="Editar lancha">
+            <b-alert v-model="showErrorEditar" variant="danger" dismissible>
+                {{errorEditar}}
+            </b-alert>
+            <form @submit.prevent="submitEditarLancha(lancha, numero, nombre)">
+                <b-row>
+                    <b-col sm="4">
+                        <label for="num"><b>Número</b></label>
+                    </b-col>
+                    <b-col sm="8">
+                        <input v-model.number="numero" type="number" min="0" max="100" class="form-control" id="num">
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col sm="4">
+                        <label for="nom"><b>Nombre</b></label>
+                    </b-col>
+                    <b-col sm="8">
+                        <input v-model="nombre" type="text" class="form-control" id="nom">
+                    </b-col>
+                </b-row>
+                <div class="d-flex justify-content-end mt-2">
+                    <b-button class="m-2" variant="info" type="submit">Editar</b-button>
+                    <b-button @click="toggleModalEditar()" class="m-2">Cancelar</b-button>
                 </div>
             </form>
         </b-modal>
@@ -100,13 +134,18 @@
         name: "Lancha",
         data() {
             return {
-                mostrarModal: false,
+                mostrarModalOcupar: false,
+                mostrarModalEditar: false,
+                showErrorOcupar: false,
+                showErrorEditar: false,
+                errorEditar: null,
+                errorOcupar: null,
                 cant_adult: null,
                 cant_jov: null,
-                error: null,
-                showError: false,
                 precioSeleccionado: null,
-                tiempo: '00:00:00'
+                tiempo: '00:00:00',
+                numero: null,
+                nombre: ''
             }
         },
         computed: {
@@ -121,28 +160,56 @@
             ...mapActions(['actualizarLancha', 'nuevaRenta', 'nuevoUso']),
             submitRenta(lancha, adl, jov, precioSelect) {
                 if(!adl || !jov) {
-                    this.error = 'No ha proporcionado una cantidad de adultos o de jovenes.';
-                    this.showError = true;
+                    this.errorOcupar = 'No ha proporcionado una cantidad de adultos o de jovenes.';
+                    this.showErrorOcupar = true;
                     return;
                 }
                 if(!precioSelect) {
-                    this.error = 'No ha seleccionado el tiempo/precio inicial, elija uno.';
-                    this.showError = true;
+                    this.errorOcupar = 'No ha seleccionado el tiempo/precio inicial, elija uno.';
+                    this.showErrorOcupar = true;
                     return;
                 }
                 this.nuevaRenta({lancha, adl, jov, precio: precioSelect});
                 this.actualizarLancha({lancha, estado: 1});
-                this.toggleModal();
-                this.reiniciarModal();
+                this.toggleModalOcupar();
+                this.reiniciarModalOcupar();
                 this.sumarTiempoGeneral(precioSelect.tiempo)
             },
             cambiarEstado(lancha, estado) {
-                this.actualizarLancha({lancha, estado});
+                this.actualizarLancha({lancha, numero: lancha.numero, nombre: lancha.nombre, estado});
             },
-            toggleModal() {
-                this.mostrarModal = !this.mostrarModal;
+            submitEditarLancha(lancha, numero, nombre) {
+                if(!numero) {
+                    this.showErrorEditar = true;
+                    this.errorEditar = 'Debe tener un número.';
+                    return;
+                }
+                this.$swal.fire({
+                    title: '¿De verdad desea editar la Lancha?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    cancelButtonColor: '#dd3333',
+                    confirmButtonText: '¡Aceptar!',
+                    cancelButtonText: 'Cancelar'
+                }).then((res) => {
+                    if(res.value) {
+                        this.actualizarLancha({lancha, numero, nombre, estado: lancha.estado});
+                        this.toggleModalEditar();
+                    }
+                });
             },
-            reiniciarModal() {
+            toggleModalOcupar() {
+                this.mostrarModalOcupar = !this.mostrarModalOcupar;
+            },
+            toggleModalEditar() {
+                this.mostrarModalEditar = !this.mostrarModalEditar;
+                if(this.mostrarModalEditar) {
+                    this.nombre = this.lancha.nombre;
+                    this.numero = this.lancha.numero;
+                }
+            }
+            ,
+            reiniciarModalOcupar() {
                 this.cant_adult = null;
                 this.cant_jov = null;
             },

@@ -21,12 +21,14 @@ export default new Vuex.Store({
         },
         updateLancha(state, lancha) {
             let indx = state.lanchas.findIndex(el => el.id === lancha.id);
-            state.lanchas[indx].estado = lancha.estado;
+            state.lanchas[indx] = lancha;
         },
         manejarError(state, error) {
             console.error(error);
             if(error == 'Error: Network Error') {
                 state.error = 'Error de conexión';
+            } else {
+                state.error = error;
             }
         },
         setRentas(state, rentas) {
@@ -91,15 +93,17 @@ export default new Vuex.Store({
             });
         },
         actualizarLancha({commit}, payload) {
-            axios.put(`/lancha/${payload.lancha.id}`, {
-                numero: payload.lancha.numero,
-                nombre: payload.lancha.nombre,
-                estado: payload.estado,
-            }).then(res => {
-                commit('updateLancha', res.data);
-            }).catch(error => {
-                commit('manejarError', error);
-            });
+            let lancha = payload.lancha;
+            lancha.numero = payload.numero;
+            lancha.nombre = payload.nombre;
+            lancha.estado = payload.estado;
+            axios.put(`/lancha/${payload.lancha.id}`, lancha)
+                .then(res => {
+                    commit('updateLancha', res.data);
+                    console.log('Lancha actualizada');
+                }).catch(error => {
+                    commit('manejarError', error);
+                });
         },
         obtenerUsosDeRentasActivas({commit}) {
             axios.get('/uso/de-renta-activa')
