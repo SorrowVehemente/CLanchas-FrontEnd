@@ -1,5 +1,5 @@
 <template>
-    <div class="col-md-4 col-sm-12">
+    <div class="col-md-6 col-sm-12">
         <b-card border-variant="primary" class="mt-2">
             <b-card-title align="center">Renta de Lancha #{{renta.lancha.numero}}</b-card-title>
             <div class="d-flex justify-content-between">
@@ -35,12 +35,17 @@
             <hr />
             <div class="d-flex justify-content-between">
                 <b-button @click="removeRenta(renta)" variant="warning">Terminar renta</b-button>
-                <b-button @click="toggleModal()" variant="info">Agregar tiempo</b-button>
+                <b-dropdown text="Acción" right variant="info">
+                    <b-dropdown-item @click="toggleModalTiempo()">Agregar tiempo</b-dropdown-item>
+                    <b-dropdown-divider />
+                    <b-dropdown-item @click="toggleModalEditar()">Editar renta</b-dropdown-item>
+                </b-dropdown>
+<!--                <b-button @click="toggleModalTiempo()" variant="info">Agregar tiempo</b-button>-->
             </div>
         </b-card>
         <b-modal hide-footer v-model="agregarTiempoModal" title="Agregar tiempo" centered>
-            <b-alert v-model="showError" variant="danger" dismissible>
-                {{error}}
+            <b-alert v-model="showErrorTiempo" variant="danger" dismissible>
+                {{errorTiempo}}
             </b-alert>
             <form @submit.prevent="addTiempo(renta, precioSeleccionado)">
                 <b-row>
@@ -60,7 +65,42 @@
                 </b-row>
                 <div class="d-flex justify-content-end mt-2">
                     <b-button class="m-2" variant="success" type="submit">Enviar</b-button>
-                    <b-button @click="toggleModal()" class="m-2">Cancelar</b-button>
+                    <b-button @click="toggleModalTiempo()" class="m-2">Cancelar</b-button>
+                </div>
+            </form>
+        </b-modal>
+        <b-modal hide-footer v-model="editarRentaModal" title="Editar datos de la renta" centered>
+            <b-alert v-model="showErrorEditar" variant="danger" dismissible>
+                {{errorEditar}}
+            </b-alert>
+            <form @submit.prevent="editarRenta(renta, cant_adult, cant_jov, observaciones)">
+                <b-row>
+                    <b-col sm="4">
+                        <label for="ca"><b>Cantidad de Adultos</b></label>
+                    </b-col>
+                    <b-col sm="8">
+                        <input v-model.number="cant_adult" type="number" min="0" max="10" class="form-control" id="ca">
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col sm="4">
+                        <label for="cj"><b>Cantidad de Jovenes</b></label>
+                    </b-col>
+                    <b-col sm="8">
+                        <input v-model.number="cant_jov" type="number" min="0" max="10" class="form-control" id="cj">
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col sm="4">
+                        <label for="to"><b>Observaciones</b></label>
+                    </b-col>
+                    <b-col sm="8">
+                        <b-form-textarea v-model="observaciones" id="to" placeholder="Observaciones de la renta"></b-form-textarea>
+                    </b-col>
+                </b-row>
+                <div class="d-flex justify-content-end mt-2">
+                    <b-button class="m-2" variant="info" type="submit">Editar</b-button>
+                    <b-button @click="toggleModalEditar()" class="m-2">Cancelar</b-button>
                 </div>
             </form>
         </b-modal>
@@ -74,11 +114,17 @@
         name: "Renta",
         data() {
             return {
-                error: null,
-                showError: false,
+                errorTiempo: null,
+                showErrorTiempo: false,
+                errorEditar: null,
+                showErrorEditar: false,
                 agregarTiempoModal: false,
+                editarRentaModal: false,
                 precioSeleccionado: null,
-                tiempo: '00:00:00'
+                tiempo: '00:00:00',
+                cant_adult: null,
+                cant_jov: null,
+                observaciones: ''
             }
         },
         props: {
@@ -90,7 +136,7 @@
             ...mapState(['precios'])
         },
         methods: {
-            ...mapActions(['terminarRenta', 'nuevoUso']),
+            ...mapActions(['terminarRenta', 'nuevoUso', 'actualizarRenta']),
             removeRenta(renta) {
                 this.$swal.fire({
                     title: '¿De verdad desea terminar la Renta?',
@@ -101,23 +147,46 @@
                     confirmButtonText: '¡Si, terminar!',
                     cancelButtonText: 'Cancelar'
                 }).then((result) => {
-                    if (result.value) {
+                    if(result.value) {
                         this.terminarRenta({renta, en_uso: false});
                     }
                 })
             },
             addTiempo(renta, precio) {
                 if(!precio) {
-                    this.error = 'No ha seleccionado un tiempo a agregar, elija uno.'
-                    this.showError = true;
+                    this.errorTiempo = 'No ha seleccionado un tiempo a agregar, elija uno.'
+                    this.showErrorTiempo = true;
                     return;
                 }
                 this.nuevoUso({renta_id: renta.id, tiempo: precio.tiempo, precio: precio.precio});
-                this.toggleModal();
+                this.toggleModalTiempo();
                 this.reiniciarModal();
                 this.sumarTiempoGeneral(precio.tiempo)
             },
-            toggleModal() {
+            editarRenta(renta, c_adultos, c_jovenes, observaciones) {
+                this.$swal.fire({
+                    title: '¿De verdad desea editar la Renta?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    cancelButtonColor: '#dd3333',
+                    confirmButtonText: '¡Aceptar!',
+                    cancelButtonText: 'Cancelar'
+                }).then((res) => {
+                    if(res.value) {
+                        this.actualizarRenta({renta, c_adultos, c_jovenes, observaciones});
+                        this.toggleModalEditar();
+                    }
+                });
+            },
+            toggleModalEditar() {
+                this.editarRentaModal = !this.editarRentaModal;
+                if(this.editarRentaModal) {
+                    this.cant_adult = this.renta.c_adultos;
+                    this.cant_jov = this.renta.c_jovenes;
+                    this.observaciones = this.renta.observaciones;
+                }
+            },
+            toggleModalTiempo() {
                 this.agregarTiempoModal = !this.agregarTiempoModal;
             },
             reiniciarModal() {
@@ -128,19 +197,19 @@
                         .add(tiempo.split(":")[2], 'seconds')
                         .add(tiempo.split(":")[1], 'minutes')
                         .add(tiempo.split(":")[0], 'hours')
-                this.tiempo = tTiempo.format("HH:mm:ss")
+                this.tiempo = tTiempo.format("HH:mm:ss");
             },
             sumarTiempo() {
-                let tTiempo = moment("00:00:00", 'HH:mm:ss')
+                let tTiempo = moment("00:00:00", 'HH:mm:ss');
                 for(let i in this.usos){
                     if(this.usos[i].renta_id === this.renta.id) {
                         tTiempo = moment(tTiempo, 'HH:mm:ss')
                             .add(this.usos[i].tiempo.split(":")[2], 'seconds')
                             .add(this.usos[i].tiempo.split(":")[1], 'minutes')
-                            .add(this.usos[i].tiempo.split(":")[0], 'hours')
+                            .add(this.usos[i].tiempo.split(":")[0], 'hours');
                     }
                 }
-                this.tiempo = tTiempo.format("HH:mm:ss")
+                this.tiempo = tTiempo.format("HH:mm:ss");
             },
             restarTiempo(m) {
                 let hi = new Date(this.renta.renta_de).toLocaleTimeString() //Hora inicio para restar
@@ -162,7 +231,7 @@
                 let tTiempo = moment('00:00:00', 'HH:mm:ss')
                     .add(dif.split(':')[2], 'seconds')
                     .add(dif.split(':')[1], 'minutes')
-                    .add(dif.split(":")[0], 'hours')
+                    .add(dif.split(":")[0], 'hours');
                 return tTiempo.minutes() < 3;
             },
             obtenerTiempoPrecioFinal() {
@@ -179,7 +248,7 @@
             }
         },
         beforeUpdate() {
-            this.sumarTiempo()
+            this.sumarTiempo();
         }
     }
 </script>
