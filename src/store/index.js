@@ -10,7 +10,8 @@ export default new Vuex.Store({
         rentas: [],
         precios: [],
         error: '',
-        usosActivos: []
+        usosActivos: [],
+        personasEspera: []
     },
     mutations: {
         setLanchas(state, lanchas) {
@@ -55,6 +56,7 @@ export default new Vuex.Store({
         updateRenta(state, renta) {
             let indx = state.rentas.findIndex(el => el.id === renta.id);
             state.rentas[indx] = renta;
+            Vue.swal.fire('¡Renta Actualizada!', 'La renta se ha actualizado con éxito.', 'success');
         },
         setUsosActivos(state, usos) {
             state.usosActivos = usos;
@@ -64,6 +66,20 @@ export default new Vuex.Store({
         },
         setError(state, error) {
             state.error = error;
+        },
+        addPersonaListaEspera(state, persona) {
+            state.personasEspera.push(persona);
+        },
+        setListaEspera(state, personas) {
+            state.personasEspera = personas;
+        },
+        updatePersonaListaEspera(state, persona) {
+            let indx = state.personasEspera.findIndex(el => el.id === persona.id);
+            state.personasEspera[indx] = persona;
+        },
+        removePersonaListaEspera(state, persona) {
+            state.personasEspera.splice(state.personasEspera.findIndex(el => el.id === persona.id), 1);
+            Vue.swal.fire('¡Persona eliminada!', 'Persona eliminada de la lista de espera con éxito.', 'success');
         }
     },
     // TODO: Separar por modulos
@@ -220,6 +236,45 @@ export default new Vuex.Store({
                     commit('updateRenta', res);
                     console.log('Renta actualizada');
                 }).catch(error => {
+                    commit('manejarError', error);
+                });
+        },
+        nuevaPersonaEspera({commit}, payload) {
+            axios.post('/lista-personas', {
+                nombre: payload.nombre
+            }).then(res => {
+                commit('addPersonaListaEspera', res.data);
+                console.log('Persona agregada a la lista de espera');
+            }).catch(error => {
+                commit('manejarError', error);
+            });
+        },
+        obtenerListaEspera({commit}) {
+            axios.get('/lista-personas')
+                .then(res => {
+                    console.log('Obtenida lista de espera', res.data);
+                    commit('setListaEspera', res.data);
+                })
+                .catch(error => {
+                    commit('manejarError', error);
+                });
+        },
+        actualizarPersonaListaEspera({commit}, payload) {
+            let persona = payload.persona;
+            persona.nombre = payload.nombre;
+            axios.put(`/lista-personas/${payload.persona.id}`,  persona)
+                .then(res => {
+                    commit('updatePersonaListaEspera', res.data);
+                }).catch(error =>{
+                    commit('manejarError', error);
+                });
+        },
+        eliminarPersonaListaEspera({commit}, payload) {
+            axios.delete(`/lista-personas/${payload.persona.id}`)
+                .then(res => {
+                    commit('removePersonaListaEspera', payload.persona);
+                    console.log(res.data);
+                }).catch(error =>{
                     commit('manejarError', error);
                 });
         }

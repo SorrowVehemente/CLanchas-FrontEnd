@@ -8,14 +8,6 @@
         <b-container>
             <router-view class="m-2" />
         </b-container>
-<!--        <div>-->
-<!--            <router-link to="/">Home</router-link> |-->
-<!--            <router-link :to="{name: 'Lanchas'}">Lanchas</router-link> |-->
-<!--            <router-link :to="{name: 'Rentas'}">Rentas</router-link> |-->
-<!--            <router-link :to="{name: 'Precios'}">Precios</router-link> |-->
-<!--            <router-link :to="{name: 'Espera'}">Lista de espera</router-link> |-->
-<!--            <router-link to="/about">About</router-link>-->
-<!--        </div>-->
     </div>
 </template>
 

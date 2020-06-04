@@ -8,7 +8,7 @@
             </b-button>
         </b-navbar>
 
-        <b-sidebar id="sidebar-backdrop" title="Menú" backdrop-variant="dark" bg-variant="white" right backdrop no-close-on-route-change>
+        <b-sidebar id="sidebar-backdrop" title="Menú" backdrop-variant="dark" bg-variant="white" right backdrop>
             <div class="py-2">
                 <b-list-group flush>
                     <b-list-group-item v-for="(link, index) in links" :to="link.to" :active="link.to.name === $route.name" class="my-1" :key="index">

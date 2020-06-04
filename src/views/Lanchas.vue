@@ -23,7 +23,7 @@
             <b-alert v-model="showError" variant="danger" dismissible>
                 {{errorModal}}
             </b-alert>
-            <form @submit.prevent="sumitLancha()">
+            <form @submit.prevent="submitLancha()">
                 <b-row class="mb-2">
                     <b-col sm="3">
                         <label for="numero">Número:</label>
@@ -69,7 +69,7 @@
         },
         methods: {
             ...mapActions(['getLanchas', 'nuevaLancha', 'obtenerPrecios', 'obtenerUsosDeRentasActivas']),
-            sumitLancha() {
+            submitLancha() {
                 if(!this.numero) {
                     this.errorModal = 'No ha ingresado un número';
                     this.showError = true;

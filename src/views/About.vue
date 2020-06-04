@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h1>Página about</h1>
+        <h1>Control de Lanchas</h1>
     </div>
 </template>
 
