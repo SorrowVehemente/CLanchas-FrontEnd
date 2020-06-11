@@ -234,7 +234,8 @@ export default new Vuex.Store({
         terminarRenta({commit, dispatch}, payload) {
             axios.put(`/renta/update-uso/${payload.renta.id},${payload.en_uso}`)
                 .then(res => {
-                    dispatch('actualizarLancha', {lancha: res.data.lancha, estado: 0});
+                    let lancha = res.data.lancha;
+                    dispatch('actualizarLancha', {lancha, numero: lancha.numero, nombre: lancha.nombre, estado: 0});
                     commit('quitarRenta', res.data);
                     dispatch('obtenerUsosDeRentasActivas');
                     console.log('Renta terminada.')

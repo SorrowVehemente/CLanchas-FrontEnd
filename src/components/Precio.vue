@@ -1,6 +1,6 @@
 <template>
     <div class="col-md-3 col-sm-6">
-        <b-card :title="'Tiempo: ' + precio.tiempo" border-variant="primary">
+        <b-card class="mt-2" :title="'Tiempo: ' + precio.tiempo" border-variant="primary">
             <b-card-text>Precio: ${{precio.precio}}</b-card-text>
             <hr />
             <div class="d-flex justify-content-end">

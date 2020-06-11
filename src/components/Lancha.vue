@@ -169,7 +169,7 @@
                     return;
                 }
                 this.nuevaRenta({lancha, adl, jov, precio: precioSelect});
-                this.actualizarLancha({lancha, estado: 1});
+                this.actualizarLancha({lancha, numero: lancha.numero, nombre: lancha.nombre, estado: 1});
                 this.toggleModalOcupar();
                 this.reiniciarModalOcupar();
                 this.sumarTiempoGeneral(precioSelect.tiempo)
