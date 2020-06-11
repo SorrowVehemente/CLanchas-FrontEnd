@@ -11,7 +11,8 @@ export default new Vuex.Store({
         precios: [],
         error: '',
         usosActivos: [],
-        personasEspera: []
+        personasEspera: [],
+        diarios: []
     },
     mutations: {
         setLanchas(state, lanchas) {
@@ -80,7 +81,22 @@ export default new Vuex.Store({
         removePersonaListaEspera(state, persona) {
             state.personasEspera.splice(state.personasEspera.findIndex(el => el.id === persona.id), 1);
             Vue.swal.fire('¡Persona eliminada!', 'Persona eliminada de la lista de espera con éxito.', 'success');
-        }
+        },
+        setDiarios(state, diarios) {
+            state.diarios = diarios;
+        },
+        addDiario(state, diario) {
+            state.diarios.push(diario);
+            Vue.swal.fire('¡Diario agregado!', 'Diario agregado éxitosamente.', 'success');
+        },
+        updateDiario(state, diario) {
+            let indx = state.diarios.findIndex(el => el.id === diario.id);
+            state.diarios[indx] = diario;
+        },
+        removeDiario(state, diario) {
+            state.diarios.splice(state.diarios.findIndex(el => el.id === diario.id), 1);
+            Vue.swal.fire('¡Diario eliminado!', 'Diario eliminado de la lista con éxito.', 'success');
+        },
     },
     // TODO: Separar por modulos
     actions: {
@@ -207,10 +223,10 @@ export default new Vuex.Store({
             });
         },
         eliminarPrecio({commit}, payload) {
-            axios.delete(`/precios/${payload.id}`)
+            axios.delete(`/precios/${payload.precio.id}`)
                 .then(res => {
                     console.log(res.data);
-                    commit('deletePrecio', payload);
+                    commit('deletePrecio', payload.precio);
                 }).catch(error => {
                     commit('manejarError', error);
                 });
@@ -277,6 +293,42 @@ export default new Vuex.Store({
                 }).catch(error =>{
                     commit('manejarError', error);
                 });
+        },
+        obtenerDiarios({commit}) {
+            axios.get('/diario')
+                .then(res =>{
+                    console.log('Diarios obtenidos');
+                    commit('setDiarios', res.data);
+                }).catch(error => {
+                    commit('manejarError', error);
+            });
+        },
+        nuevoDiario({commit}, payload) {
+            axios.post('/diario', payload)
+                .then(res => {
+                    commit('addDiario', res.data);
+                }).catch(error => {
+                    commit('manejarError', error);
+            });
+        },
+        eliminarDiario({commit}, payload) {
+            axios.delete(`/diario/${payload.diario.id}`)
+                .then(res => {
+                    commit('removeDiario', payload.diario);
+                    console.log(res.data);
+                }).catch(error => {
+                    commit('manejarError', error);
+            });
+        },
+        actualizarDiario({commit}, payload) {
+            let diario = payload.diario;
+            diario.descripcion = payload.descripcion;
+            axios.put(`/diario/${payload.diario.id}`, diario)
+                .then(res => {
+                    commit('updateDiario', res.data);
+                }).catch(error => {
+                    commit('manejarError', error);
+            })
         }
     },
     modules: {

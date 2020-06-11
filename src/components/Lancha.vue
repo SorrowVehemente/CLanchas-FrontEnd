@@ -1,6 +1,5 @@
 <template>
     <div class="col-md-4 col-sm-6">
-<!--        TODO: Modificar lancha-->
         <b-card class="mt-2" :border-variant="lancha.estado === 0 ? 'success' : lancha.estado === 1  ? 'warning' : 'info'" align="center">
             <div class="d-flex justify-content-center">
                 <b-card-title>Lancha #{{lancha.numero}}</b-card-title>

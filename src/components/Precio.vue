@@ -30,7 +30,7 @@
                     cancelButtonText: 'Cancelar'
                 }).then((result) => {
                     if (result.value) {
-                        this.eliminarPrecio(precio);
+                        this.eliminarPrecio({precio});
                     }
                 })
             }
