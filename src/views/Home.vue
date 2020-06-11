@@ -3,7 +3,7 @@
         <h1>Inicio</h1>
         <div class="mt-2">
             <b-row class="my-4">
-                <b-col sm="6">
+                <b-col md="6" sm="12" class="mt-2">
                     <b-card border-variant="success">
                         <b-card-title>Lanchas disponibles ({{estado.disponibles}})</b-card-title>
                         <ul>
@@ -15,7 +15,7 @@
                         <b-button variant="success" :to="{ name: 'Lanchas' }">Ir a lanchas</b-button>
                     </b-card>
                 </b-col>
-                <b-col sm="6">
+                <b-col md="6" sm="12" class="mt-2">
                     <b-card border-variant="primary">
                         <b-card-title>Lanchas ocupadas ({{estado.ocupadas}})</b-card-title>
                         <ul>
@@ -29,7 +29,7 @@
                 </b-col>
             </b-row>
             <b-row class="my-4">
-                <b-col sm="6">
+                <b-col md="6" sm="12" class="mt-2">
                     <b-card border-variant="dark">
                         <b-card-title>Lanchas en reparación ({{estado.reparacion}})</b-card-title>
                         <ul>
@@ -41,7 +41,7 @@
                         <b-button variant="secondary" :to="{ name: 'Lanchas' }">Ir a lanchas</b-button>
                     </b-card>
                 </b-col>
-                <b-col sm="6">
+                <b-col md="6" sm="12" class="mt-2">
                     <b-card border-variant="dark">
                         <b-card-title>Lanchas en otro estado ({{estado.otro}})</b-card-title>
                         <ul>
@@ -55,7 +55,7 @@
                 </b-col>
             </b-row>
             <b-row class="my-4">
-                <b-col sm="6">
+                <b-col md="6" sm="12" class="mt-2">
                     <b-card border-variant="info">
                         <b-card-title>Personas es espera ({{estado.personasLista}})</b-card-title>
                         <ul>
